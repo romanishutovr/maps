@@ -42,6 +42,10 @@ const MapComponent = () => {
     return null;
   };
 
+  const handleRemoveMarker = (index) => {
+    setMarkers((current) => current.filter((_, i) => i !== index)); // Remove marker by index
+  };
+
   return (
     <MapContainer center={position} zoom={zoomLevel} style={{ height: '500px', width: '500px' }}>
       <TileLayer
@@ -55,7 +59,10 @@ const MapComponent = () => {
         maxClusterRadius={40} 
       >
         {markers.map((marker, index) => (
-          <Marker key={index} position={[marker.lat, marker.lng]} icon={createIcon(zoomLevel)}>
+          <Marker key={index} position={[marker.lat, marker.lng]} icon={createIcon(zoomLevel)} 
+          eventHandlers={{
+            contextmenu: () => handleRemoveMarker(index), // Remove marker on right-click
+          }}>
             <Popup>
               Новый маркер на координатах: {marker.lat}, {marker.lng}
             </Popup>
