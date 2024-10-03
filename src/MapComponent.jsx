@@ -9,9 +9,9 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 // Sample icons data
 const icons = [
-  { name: 'Default', url: '/free-icon-location-11768987.png' },
-  { name: 'Star', url: '/star_10171019.png' },
-  { name: 'Hart', url: '/favorite_15049585.png' },
+  { name: 'Default', url: '/free-icon-location-11768987.png',type:'default' },
+  { name: 'Star', url: '/star_10171019.png',type:'star' },
+  { name: 'Heart', url: '/favorite_15049585.png',type:'heart' },
 ];
 
 const MapComponent = () => {

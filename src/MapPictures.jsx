@@ -9,9 +9,9 @@ import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 const icons = [
-  { name: 'Default', url: '/free-icon-location-11768987.png' },
-  { name: 'Star', url: '/star_10171019.png' },
-  { name: 'Hart', url: '/favorite_15049585.png' },
+  { name: 'Default', url: '/free-icon-location-11768987.png',type:'default' },
+  { name: 'Star', url: '/star_10171019.png',type:'star' },
+  { name: 'Heart', url: '/favorite_15049585.png',type:'heart' },
 ];
 
 const MapPictures = () => {
@@ -24,7 +24,8 @@ const MapPictures = () => {
   const position = [0, 0]; // Центр для изображения
   const bounds = [[-90, -180], [90, 180]]; // Указать границы изображения (нижний левый и верхний правый углы)
 
-
+useEffect(() => {
+  console.log(markers)}, [markers]);
   // Настройка кастомной иконки маркера с изменяемым размером
   const createIcon = (zoom, iconUrl) => {
     return new L.Icon({
