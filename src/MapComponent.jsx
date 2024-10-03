@@ -43,7 +43,7 @@ const MapComponent = () => {
   };
 
   return (
-    <MapContainer center={position} zoom={zoomLevel} style={{ height: '100vh', width: '100%' }}>
+    <MapContainer center={position} zoom={zoomLevel} style={{ height: '500px', width: '500px' }}>
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution="&copy; OpenStreetMap contributors"
