@@ -18,6 +18,7 @@ const MapPictures = () => {
   const [zoomLevel, setZoomLevel] = useState(1); // Начальный уровень зума
   const [markers, setMarkers] = useState([]);
   const [selectedIcon, setSelectedIcon] = useState(icons[0]); // Default icon
+  // eslint-disable-next-line no-unused-vars
   const [iconInput, setIconInput] = useState('');
   const [filteredIcons, setFilteredIcons] = useState(icons);
   const position = [0, 0]; // Центр для изображения
@@ -79,12 +80,7 @@ const MapPictures = () => {
     setMarkers((current) => current.filter((_, i) => i !== index)); // Удаление маркера по индексу
   };
 
-  const handleIconInputChange = (e) => {
-    const value = e.target.value;
-    setIconInput(value);
-    // Фильтрация иконок на основе ввода
-    setFilteredIcons(icons.filter(icon => icon.name.toLowerCase().includes(value.toLowerCase())));
-  };
+
 
   const handleIconSelect = (icon) => {
     setSelectedIcon(icon);

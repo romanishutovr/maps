@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -54,12 +55,6 @@ const MapComponent = () => {
     setMarkers((current) => current.filter((_, i) => i !== index)); // Удаление маркера по индексу
   };
 
-  const handleIconInputChange = (e) => {
-    const value = e.target.value;
-    setIconInput(value);
-    // Фильтрация иконок на основе ввода
-    setFilteredIcons(icons.filter(icon => icon.name.toLowerCase().includes(value.toLowerCase())));
-  };
 
   const handleIconSelect = (icon) => {
     setSelectedIcon(icon);
