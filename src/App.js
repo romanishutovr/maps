@@ -11,8 +11,8 @@ function App() {
     <div>
       <button onClick={()=>setSelected("map")}>map</button>
       <button onClick={()=>setSelected("image")}>image</button>
-
       {selected === "map" ? <MapComponent/> : <MapPictures/>}
+      
     </div>
   );
 }

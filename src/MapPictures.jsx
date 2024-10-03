@@ -8,18 +8,28 @@ import MarkerClusterGroup from '@changey/react-leaflet-markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
+const icons = [
+  { name: 'Default', url: '/free-icon-location-11768987.png' },
+  { name: 'Star', url: '/star_10171019.png' },
+  { name: 'Hart', url: '/favorite_15049585.png' },
+];
+
 const MapPictures = () => {
   const [zoomLevel, setZoomLevel] = useState(1); // Начальный уровень зума
   const [markers, setMarkers] = useState([]);
+  const [selectedIcon, setSelectedIcon] = useState(icons[0]); // Default icon
+  const [iconInput, setIconInput] = useState('');
+  const [filteredIcons, setFilteredIcons] = useState(icons);
   const position = [0, 0]; // Центр для изображения
   const bounds = [[-90, -180], [90, 180]]; // Указать границы изображения (нижний левый и верхний правый углы)
 
+
   // Настройка кастомной иконки маркера с изменяемым размером
-  const createIcon = (zoom) => {
+  const createIcon = (zoom, iconUrl) => {
     return new L.Icon({
-      iconUrl: '/free-icon-location-11768987.png',
-      iconSize: [25 + zoom * 10, 41 + zoom * 10], // Изменение размера в зависимости от зума
-      iconAnchor: [12 + (zoom * 10) / 2, 41 + (zoom * 10)],
+      iconUrl: iconUrl,
+      iconSize: [25 + zoom, 41 + zoom], // Изменение размера в зависимости от зума
+      iconAnchor: [12 + zoom / 2, 41 + zoom],
     });
   };
 
@@ -59,17 +69,52 @@ const MapPictures = () => {
     useMapEvents({
       click(e) {
         const { lat, lng } = e.latlng; // Получение координат клика
-        setMarkers((current) => [...current, { lat, lng }]); // Добавление нового маркера
+        setMarkers((current) => [...current, { lat, lng, icon: selectedIcon }]); // Добавление нового маркера
       },
     });
     return null;
   };
 
   const handleRemoveMarker = (index) => {
-    setMarkers((current) => current.filter((_, i) => i !== index)); // Remove marker by index
+    setMarkers((current) => current.filter((_, i) => i !== index)); // Удаление маркера по индексу
   };
 
+  const handleIconInputChange = (e) => {
+    const value = e.target.value;
+    setIconInput(value);
+    // Фильтрация иконок на основе ввода
+    setFilteredIcons(icons.filter(icon => icon.name.toLowerCase().includes(value.toLowerCase())));
+  };
+
+  const handleIconSelect = (icon) => {
+    setSelectedIcon(icon);
+    setIconInput(icon.name); // Обновление ввода с именем выбранной иконки
+    setFilteredIcons(icons); // Сброс списка иконок
+  };
+  
+
   return (
+    <div>
+
+      <ul style={{ listStyleType: 'none', padding: 0 }}>
+        {filteredIcons.map((icon, index) => (
+          <li 
+          key={index} 
+          onClick={() => handleIconSelect(icon)} 
+          style={{
+            cursor: 'pointer',
+            padding: '5px',
+            border: '1px solid #ccc',
+            marginTop: '5px',
+            borderColor: selectedIcon.name === icon.name ? 'green' : '#ccc', // Green border if selected
+            backgroundColor: selectedIcon.name === icon.name ? '#f0fff0' : 'transparent', // Light background if selected
+          }}
+        >
+          <img src={icon.url} alt={icon.name} style={{ width: '20px', marginRight: '5px' }} />
+          {icon.name}
+        </li>
+        ))}
+      </ul>
     <MapContainer 
       center={position} 
       zoom={1} 
@@ -84,7 +129,7 @@ const MapPictures = () => {
         maxClusterRadius={40} 
       >
         {markers.map((marker, index) => (
-          <Marker key={index} position={[marker.lat, marker.lng]} icon={createIcon(zoomLevel)}
+          <Marker key={index} position={[marker.lat, marker.lng]} icon={createIcon(zoomLevel, marker.icon.url)}
           eventHandlers={{
             contextmenu: () => handleRemoveMarker(index), // Remove marker on right-click
           }}
@@ -99,6 +144,7 @@ const MapPictures = () => {
       <MapEvents />
       <AddMarkerOnClick />
     </MapContainer>
+    </div>
   );
 };
 
