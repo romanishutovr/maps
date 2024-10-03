@@ -19,7 +19,6 @@ const MapComponent = () => {
   const position = [51.505, -0.09];
   const [markers, setMarkers] = useState([]);
   const [selectedIcon, setSelectedIcon] = useState(icons[0]); // Default icon
-  const [iconInput, setIconInput] = useState('');
   const [filteredIcons, setFilteredIcons] = useState(icons);
 
   // Настройка кастомной иконки маркера с изменяемым размером
@@ -58,7 +57,6 @@ const MapComponent = () => {
 
   const handleIconSelect = (icon) => {
     setSelectedIcon(icon);
-    setIconInput(icon.name); // Обновление ввода с именем выбранной иконки
     setFilteredIcons(icons); // Сброс списка иконок
   };
 

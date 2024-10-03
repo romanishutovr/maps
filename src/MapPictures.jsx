@@ -18,7 +18,6 @@ const MapPictures = () => {
   const [zoomLevel, setZoomLevel] = useState(1);
   const [markers, setMarkers] = useState([]);
   const [selectedIcon, setSelectedIcon] = useState(icons[0]);
-  const [iconInput, setIconInput] = useState('');
   const [filteredIcons, setFilteredIcons] = useState(icons);
   const position = [0, 0];
   const bounds = [[-90, -180], [90, 180]];
@@ -78,7 +77,6 @@ const MapPictures = () => {
 
   const handleIconSelect = (icon) => {
     setSelectedIcon(icon);
-    setIconInput(icon.name);
     setFilteredIcons(icons);
   };
 
