@@ -88,7 +88,6 @@ const MapComponent = () => {
       <MapContainer center={position} zoom={zoomLevel} style={{ height: '500px', width: '500px' }}>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution="&copy; OpenStreetMap contributors"
         />
         <MarkerClusterGroup
           showCoverageOnHover={false} 
