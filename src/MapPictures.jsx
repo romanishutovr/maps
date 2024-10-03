@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, Marker, Popup, useMap,Polygon, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-fullscreen';
 import 'leaflet-fullscreen/dist/leaflet.fullscreen.css';
@@ -12,6 +12,7 @@ const icons = [
   { name: 'Default', url: '/free-icon-location-11768987.png', type: 'default' },
   { name: 'Star', url: '/star_10171019.png', type: 'star' },
   { name: 'Heart', url: '/favorite_15049585.png', type: 'heart' },
+  { name: 'Zone', url: '/favorite_15049585.png', type: 'zone' },
 ];
 
 const MapPictures = () => {
@@ -21,6 +22,9 @@ const MapPictures = () => {
   const [filteredIcons, setFilteredIcons] = useState(icons);
   const position = [0, 0];
   const bounds = [[-90, -180], [90, 180]];
+
+  const [currentPolygon, setCurrentPolygon] = useState([]);
+  const [polygons, setPolygons] = useState([]);
 
   useEffect(() => {
     console.log(markers);
@@ -64,6 +68,7 @@ const MapPictures = () => {
   const AddMarkerOnClick = () => {
     useMapEvents({
       click(e) {
+        if(selectedIcon.type === 'zone') return
         const { lat, lng } = e.latlng;
         setMarkers((current) => [...current, { lat, lng, icon: selectedIcon }]);
       },
@@ -78,6 +83,23 @@ const MapPictures = () => {
   const handleIconSelect = (icon) => {
     setSelectedIcon(icon);
     setFilteredIcons(icons);
+  };
+
+  const AddPolygonOnClick = () => {
+    useMapEvents({
+      click(e) {
+        if(selectedIcon.type !== 'zone') return
+        const { lat, lng } = e.latlng;
+        setCurrentPolygon((current) => [...current, [lat, lng]]);
+      },
+      contextmenu() {
+        if (currentPolygon.length > 0) {
+          setPolygons((current) => [...current, currentPolygon]);
+          setCurrentPolygon([]);
+        }
+      },
+    });
+    return null;
   };
 
   return (
@@ -129,10 +151,18 @@ const MapPictures = () => {
               </Popup>
             </Marker>
           ))}
+          {polygons.map((polygon, index) => (
+            <Polygon key={index} positions={polygon} color="blue" fillOpacity={0} dashArray="5, 5" />
+          ))}
+          
+          {currentPolygon.length > 0 && (
+            <Polygon positions={currentPolygon} color="red" fillOpacity={0.3} dashArray="5, 5" />
+          )}
         </MarkerClusterGroup>
         <ImageOverlay />
         <MapEvents />
         <AddMarkerOnClick />
+        <AddPolygonOnClick />
       </MapContainer>
     </div>
   );
