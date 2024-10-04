@@ -101,52 +101,12 @@ const MapComponent = () => {
   };
 
   return (
-    <div>
-      
-      
-      <ul style={{ listStyleType: 'none', padding: 0, width:"200px" }}>
-        {filteredIcons.map((icon, index) => (
-          <li
-            key={index}
-            onClick={() => handleIconSelect(icon)}
-            style={{
-              display:"flex",
-              alignItems: "center",
-              cursor: 'pointer',
-              padding: '5px',
-              border: '1px solid #ccc',
-              marginTop: '5px',
-              borderColor: selectedIcon.name === icon.name ? 'green' : '#ccc',
-              backgroundColor: selectedIcon.name === icon.name ? '#f0fff0' : 'transparent',
-            }}
-          >
-            <img src={icon.url} alt={icon.name} style={{ width: '20px', marginRight: '5px' }} />
-            {icon.name}
-          </li>
-        ))}
-      </ul>
-      
-      <div style={{ display:"flex", flexDirection:"row",alignItems: "center" }} >
-        <p style={{ height:"20px", marginRight:"10px"}} >Select layer:</p>
-      <select style={{  marginRight:"20px"}} onChange={handleLayerChange} value={activeLayer}>
-        {baseLayers.map((layer) => (
-          <option key={layer.name} value={layer.url}>
-            {layer.name}
-          </option>
-        ))}
-      </select>
-      {cursorCoords && (
-        <div >
-          lonlat [{cursorCoords.lat.toFixed(5)}, {cursorCoords.lng.toFixed(5)}]
-        </div>
-      )}
-      </div>
+    <div style={{display:"flex"}}>
       <MapContainer 
   center={position} 
   zoom={zoomLevel} 
-  scrollWheelZoom={false} // Disable zoom on scroll
   fullscreenControl={true}  
-  style={{ height: '100vh', width: '100vw' }}
+  style={{ height: '650px', width: '800px', marginRight:"20px" }}
   
 >
   <TileLayer url={activeLayer} />
@@ -186,6 +146,46 @@ const MapComponent = () => {
   <AddMarkerOnClick />
   <AddPolygonOnClick />
 </MapContainer>
+      <div>
+      <ul style={{ listStyleType: 'none', padding: 0, width:"200px" }}>
+        {filteredIcons.map((icon, index) => (
+          <li
+            key={index}
+            onClick={() => handleIconSelect(icon)}
+            style={{
+              display:"flex",
+              alignItems: "center",
+              cursor: 'pointer',
+              padding: '5px',
+              border: '1px solid #ccc',
+              marginTop: '5px',
+              borderColor: selectedIcon.name === icon.name ? 'green' : '#ccc',
+              backgroundColor: selectedIcon.name === icon.name ? '#f0fff0' : 'transparent',
+            }}
+          >
+            <img src={icon.url} alt={icon.name} style={{ width: '20px', marginRight: '5px' }} />
+            {icon.name}
+          </li>
+        ))}
+      </ul>
+      
+      <div style={{ display:"flex", flexDirection:"row",alignItems: "center" }} >
+        <p style={{ height:"20px", marginRight:"10px"}} >Select layer:</p>
+      <select style={{  marginRight:"20px"}} onChange={handleLayerChange} value={activeLayer}>
+        {baseLayers.map((layer) => (
+          <option key={layer.name} value={layer.url}>
+            {layer.name}
+          </option>
+        ))}
+      </select>
+      {cursorCoords && (
+        <div >
+          lonlat [{cursorCoords.lat.toFixed(5)}, {cursorCoords.lng.toFixed(5)}]
+        </div>
+      )}
+      </div>
+      </div>
+      
     </div>
   );
 };

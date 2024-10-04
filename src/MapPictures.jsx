@@ -107,35 +107,14 @@ const MapPictures = () => {
   };
 
   return (
-    <div style={{ height: '100%', width: '100%' }}>
-      <ul style={{ listStyleType: 'none', padding: 0,width:"200px" }}>
-        {filteredIcons.map((icon, index) => (
-          <li
-            key={index}
-            onClick={() => handleIconSelect(icon)}
-            style={{
-              display:"flex",
-              alignItems: "center",
-              cursor: 'pointer',
-              padding: '5px',
-              border: '1px solid #ccc',
-              marginTop: '5px',
-              borderColor: selectedIcon.name === icon.name ? 'green' : '#ccc',
-              backgroundColor: selectedIcon.name === icon.name ? '#f0fff0' : 'transparent',
-            }}
-          >
-            <img src={icon.url} alt={icon.name} style={{ width: '20px', marginRight: '5px' }} />
-            {icon.name}
-          </li>
-        ))}
-      </ul>
-      <MapContainer
+    <div style={{ display:"flex" }}>
+
+<MapContainer
        fullscreenControl={true}
         center={position}
         zoom={1}
-        style={{ height: '100vh', width: '100vw' }}
+        style={{ height: '650px', width: '800px', marginRight:"20px" }}
         maxZoom={5}
-        scrollWheelZoom={false}
       >
         <MarkerClusterGroup
           showCoverageOnHover={false}
@@ -177,6 +156,30 @@ const MapPictures = () => {
         <AddMarkerOnClick />
         <AddPolygonOnClick />
       </MapContainer>
+      <div>
+      <ul style={{ listStyleType: 'none', padding: 0,width:"200px" }}>
+        {filteredIcons.map((icon, index) => (
+          <li
+            key={index}
+            onClick={() => handleIconSelect(icon)}
+            style={{
+              display:"flex",
+              alignItems: "center",
+              cursor: 'pointer',
+              padding: '5px',
+              border: '1px solid #ccc',
+              marginTop: '5px',
+              borderColor: selectedIcon.name === icon.name ? 'green' : '#ccc',
+              backgroundColor: selectedIcon.name === icon.name ? '#f0fff0' : 'transparent',
+            }}
+          >
+            <img src={icon.url} alt={icon.name} style={{ width: '20px', marginRight: '5px' }} />
+            {icon.name}
+          </li>
+        ))}
+      </ul>
+      </div>
+
     </div>
   );
 };
