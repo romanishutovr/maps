@@ -20,11 +20,15 @@ const MapPictures = () => {
   const [markers, setMarkers] = useState([]);
   const [selectedIcon, setSelectedIcon] = useState(icons[0]);
   const [filteredIcons, setFilteredIcons] = useState(icons);
-  const position = [0, 0];
+  const position = [49.98251522092236, 36.22808754444123];
   const bounds = [[-90, -180], [90, 180]];
 
   const [currentPolygon, setCurrentPolygon] = useState([]);
   const [polygons, setPolygons] = useState([]);
+  useEffect(() => {
+    console.log(currentPolygon, polygons);
+  }, [currentPolygon, polygons]);
+
 
   useEffect(() => {
     console.log(markers);
@@ -124,7 +128,7 @@ const MapPictures = () => {
         ))}
       </ul>
       <MapContainer
-      fullscreenControl={true}
+       fullscreenControl={true}
         center={position}
         zoom={1}
         style={{ height: '500px', width: "500px" }}

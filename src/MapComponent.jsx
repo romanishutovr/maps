@@ -14,8 +14,8 @@ const icons = [
 ];
 
 const MapComponent = () => {
-  const [zoomLevel, setZoomLevel] = useState(13);
-  const position = [51.505, -0.09];
+  const [zoomLevel, setZoomLevel] = useState(19);
+  const position = [49.98251522092236, 36.22808754444123];
   const [markers, setMarkers] = useState([]);
   const [selectedIcon, setSelectedIcon] = useState(icons[0]);
   const [filteredIcons, setFilteredIcons] = useState(icons);
