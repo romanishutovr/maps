@@ -88,7 +88,6 @@ const MapComponent = () => {
     setFilteredIcons(icons);
   };
 
-  useEffect(() => {console.log(cursorCoords, markers)}, [cursorCoords]);
 
   return (
     <div>
