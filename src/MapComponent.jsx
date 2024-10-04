@@ -7,10 +7,16 @@ import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 const icons = [
-  { name: 'Default', url: '/free-icon-location-11768987.png', type: 'default' },
-  { name: 'Star', url: '/star_10171019.png', type: 'star' },
-  { name: 'Heart', url: '/favorite_15049585.png', type: 'heart' },
-  { name: 'Zone', url: '/favorite_15049585.png', type: 'zone' },
+  { name: 'Antena', url: '/antena.png', type: 'antena' },
+  { name: 'Person', url: '/Person.png', type: 'Person' },
+  { name: 'Equipment', url: '/Equipment.png', type: 'Equipment' },
+  { name: 'Zone', url: '/free-icon-location-11768987.png', type: 'zone' },
+];
+
+// Define the base layers
+const baseLayers = [
+  { name: 'OpenStreetMap', url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png' },
+  { name: 'Esri.WorldImagery', url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' }
 ];
 
 const MapComponent = () => {
@@ -21,14 +27,15 @@ const MapComponent = () => {
   const [filteredIcons, setFilteredIcons] = useState(icons);
   const [currentPolygon, setCurrentPolygon] = useState([]);
   const [polygons, setPolygons] = useState([]);
-  const cursorCoordsRef = useRef(null); // Используем useRef для хранения координат курсора
-  const [cursorCoords, setCursorCoords] = useState(null); // Отдельное состояние для рендера координат
+  const cursorCoordsRef = useRef(null);
+  const [cursorCoords, setCursorCoords] = useState(null);
+  const [activeLayer, setActiveLayer] = useState(baseLayers[0].url); // Initialize with the first layer
 
   const createIcon = (zoom, iconUrl) => {
     return new L.Icon({
       iconUrl: iconUrl,
-      iconSize: [25 + zoom, 41 + zoom],
-      iconAnchor: [12 + zoom / 2, 41 + zoom],
+      iconSize: [10 + zoom, 10 + zoom],
+      iconAnchor: [5 + zoom / 1,2 + zoom],
     });
   };
 
@@ -44,8 +51,8 @@ const MapComponent = () => {
   const TrackMouseMovement = () => {
     useMapEvents({
       mousemove: (e) => {
-        cursorCoordsRef.current = e.latlng; // Обновление координат курсора без ререндеринга
-        setCursorCoords(e.latlng); // Обновление состояния для отображения координат
+        cursorCoordsRef.current = e.latlng;
+        setCursorCoords(e.latlng);
       },
     });
     return null;
@@ -88,15 +95,23 @@ const MapComponent = () => {
     setFilteredIcons(icons);
   };
 
+  // Handle layer change
+  const handleLayerChange = (event) => {
+    setActiveLayer(event.target.value);
+  };
 
   return (
     <div>
-      <ul style={{ listStyleType: 'none', padding: 0 }}>
+      
+      
+      <ul style={{ listStyleType: 'none', padding: 0, width:"200px" }}>
         {filteredIcons.map((icon, index) => (
           <li
             key={index}
             onClick={() => handleIconSelect(icon)}
             style={{
+              display:"flex",
+              alignItems: "center",
               cursor: 'pointer',
               padding: '5px',
               border: '1px solid #ccc',
@@ -110,42 +125,67 @@ const MapComponent = () => {
           </li>
         ))}
       </ul>
+      
+      <div style={{ display:"flex", flexDirection:"row",alignItems: "center" }} >
+        <p style={{ height:"20px", marginRight:"10px"}} >Select layer:</p>
+      <select style={{  marginRight:"20px"}} onChange={handleLayerChange} value={activeLayer}>
+        {baseLayers.map((layer) => (
+          <option key={layer.name} value={layer.url}>
+            {layer.name}
+          </option>
+        ))}
+      </select>
       {cursorCoords && (
-        <div style={{ marginTop: '10px' }}>
-          Координаты курсора: {cursorCoords.lat.toFixed(5)}, {cursorCoords.lng.toFixed(5)}
+        <div >
+          lonlat [{cursorCoords.lat.toFixed(5)}, {cursorCoords.lng.toFixed(5)}]
         </div>
       )}
-      <MapContainer center={position} zoom={zoomLevel} style={{ height: '500px', width: '500px' }}>
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        <MarkerClusterGroup showCoverageOnHover={false} zoomToBoundsOnClick={true} maxClusterRadius={40}>
-          {markers.map((marker, index) => (
-            <Marker
-              key={index}
-              position={[marker.lat, marker.lng]}
-              icon={createIcon(zoomLevel, marker.icon.url)}
-              eventHandlers={{
-                contextmenu: () => handleRemoveMarker(index),
-              }}
-            >
-              <Popup>
-                Новый маркер на координатах: {marker.lat}, {marker.lng}
+      </div>
+      <MapContainer 
+  center={position} 
+  zoom={zoomLevel} 
+  scrollWheelZoom={false} // Disable zoom on scroll
+  fullscreenControl={true}  
+  style={{ height: '100vh', width: '100vw' }}
+  
+>
+  <TileLayer url={activeLayer} />
+  <MarkerClusterGroup showCoverageOnHover={false} zoomToBoundsOnClick={true} maxClusterRadius={40}>
+    {markers.map((marker, index) => (
+      <Marker
+        key={index}
+        position={[marker.lat, marker.lng]}
+        icon={createIcon(zoomLevel, marker.icon.url)}
+        eventHandlers={{
+          contextmenu: () => handleRemoveMarker(index),
+        }}
+      >
+        <Popup>
+              <div style={{display:"flex", alignItems: "center"}}>
+                <img src={marker.icon.url} alt={marker.icon.name} style={{width:"40px", height:"40px", marginRight:"20px"}}>
+                </img>
+                <div>
+                <p> Some {marker.icon.name}</p>
+                <p>Short description </p>
+                </div>
+              </div>
               </Popup>
-            </Marker>
-          ))}
-        </MarkerClusterGroup>
-          {polygons.map((polygon, index) => (
-            <Polygon key={index} positions={polygon} color="blue" fillOpacity={0} dashArray="5, 5" />
-          ))}
+      </Marker>
+    ))}
+  </MarkerClusterGroup>
+  {polygons.map((polygon, index) => (
+    <Polygon key={index} positions={polygon} color="blue" fillOpacity={0} dashArray="5, 5" />
+  ))}
+  
+  {currentPolygon.length > 0 && (
+    <Polygon positions={currentPolygon} color="red" fillOpacity={0.3} dashArray="5, 5" />
+  )}
 
-          {currentPolygon.length > 0 && (
-            <Polygon positions={currentPolygon} color="red" fillOpacity={0.3} dashArray="5, 5" />
-          )}
-
-        <MapEvents />
-        <TrackMouseMovement />
-        <AddMarkerOnClick />
-        <AddPolygonOnClick />
-      </MapContainer>
+  <MapEvents />
+  <TrackMouseMovement />
+  <AddMarkerOnClick />
+  <AddPolygonOnClick />
+</MapContainer>
     </div>
   );
 };
