@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polygon, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -15,12 +15,14 @@ const icons = [
 
 const MapComponent = () => {
   const [zoomLevel, setZoomLevel] = useState(19);
-  const position = [49.98251522092236, 36.22808754444123];
+  const position = [41.67720, -93.71894];
   const [markers, setMarkers] = useState([]);
   const [selectedIcon, setSelectedIcon] = useState(icons[0]);
   const [filteredIcons, setFilteredIcons] = useState(icons);
   const [currentPolygon, setCurrentPolygon] = useState([]);
   const [polygons, setPolygons] = useState([]);
+  const cursorCoordsRef = useRef(null); // Используем useRef для хранения координат курсора
+  const [cursorCoords, setCursorCoords] = useState(null); // Отдельное состояние для рендера координат
 
   const createIcon = (zoom, iconUrl) => {
     return new L.Icon({
@@ -39,10 +41,20 @@ const MapComponent = () => {
     return null;
   };
 
+  const TrackMouseMovement = () => {
+    useMapEvents({
+      mousemove: (e) => {
+        cursorCoordsRef.current = e.latlng; // Обновление координат курсора без ререндеринга
+        setCursorCoords(e.latlng); // Обновление состояния для отображения координат
+      },
+    });
+    return null;
+  };
+
   const AddMarkerOnClick = () => {
     useMapEvents({
       click(e) {
-        if(selectedIcon.type === 'zone') return
+        if (selectedIcon.type === 'zone') return;
         const { lat, lng } = e.latlng;
         setMarkers((current) => [...current, { lat, lng, icon: selectedIcon }]);
       },
@@ -53,7 +65,7 @@ const MapComponent = () => {
   const AddPolygonOnClick = () => {
     useMapEvents({
       click(e) {
-        if(selectedIcon.type !== 'zone') return
+        if (selectedIcon.type !== 'zone') return;
         const { lat, lng } = e.latlng;
         setCurrentPolygon((current) => [...current, [lat, lng]]);
       },
@@ -76,6 +88,8 @@ const MapComponent = () => {
     setFilteredIcons(icons);
   };
 
+  useEffect(() => {console.log(cursorCoords, markers)}, [cursorCoords]);
+
   return (
     <div>
       <ul style={{ listStyleType: 'none', padding: 0 }}>
@@ -97,30 +111,39 @@ const MapComponent = () => {
           </li>
         ))}
       </ul>
-
+      {cursorCoords && (
+        <div style={{ marginTop: '10px' }}>
+          Координаты курсора: {cursorCoords.lat.toFixed(5)}, {cursorCoords.lng.toFixed(5)}
+        </div>
+      )}
       <MapContainer center={position} zoom={zoomLevel} style={{ height: '500px', width: '500px' }}>
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <MarkerClusterGroup showCoverageOnHover={false} zoomToBoundsOnClick={true} maxClusterRadius={40}>
           {markers.map((marker, index) => (
-            <Marker key={index} position={[marker.lat, marker.lng]} icon={createIcon(zoomLevel, marker.icon.url)} 
+            <Marker
+              key={index}
+              position={[marker.lat, marker.lng]}
+              icon={createIcon(zoomLevel, marker.icon.url)}
               eventHandlers={{
                 contextmenu: () => handleRemoveMarker(index),
-              }}>
+              }}
+            >
               <Popup>
                 Новый маркер на координатах: {marker.lat}, {marker.lng}
               </Popup>
             </Marker>
           ))}
-          
+        </MarkerClusterGroup>
           {polygons.map((polygon, index) => (
             <Polygon key={index} positions={polygon} color="blue" fillOpacity={0} dashArray="5, 5" />
           ))}
-          
+
           {currentPolygon.length > 0 && (
             <Polygon positions={currentPolygon} color="red" fillOpacity={0.3} dashArray="5, 5" />
           )}
-        </MarkerClusterGroup>
+
         <MapEvents />
+        <TrackMouseMovement />
         <AddMarkerOnClick />
         <AddPolygonOnClick />
       </MapContainer>
