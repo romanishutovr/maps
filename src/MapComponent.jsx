@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polygon, useMapEvents } from 'react-leaflet';
+import React, { useState, useRef, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Polygon, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import MarkerClusterGroup from '@changey/react-leaflet-markercluster';
@@ -21,7 +21,7 @@ const baseLayers = [
 
 const MapComponent = () => {
   const [zoomLevel, setZoomLevel] = useState(19);
-  const position = [41.67720, -93.71894];
+  const position = [33.61676, -86.13979];
   const [markers, setMarkers] = useState([]);
   const [selectedIcon, setSelectedIcon] = useState(icons[0]);
   const [filteredIcons, setFilteredIcons] = useState(icons);
@@ -30,12 +30,19 @@ const MapComponent = () => {
   const cursorCoordsRef = useRef(null);
   const [cursorCoords, setCursorCoords] = useState(null);
   const [activeLayer, setActiveLayer] = useState(baseLayers[0].url); // Initialize with the first layer
+  const [imageOpacity, setImageOpacity] = useState(1);
+  const [imageSize, setImageSize] = useState({ width: 0.069, height: 0.045 });
+
+  const [overlayPosition, setOverlayPosition] = useState([33.587859999999864, -86.16768999999995]);
+  // const [isDragging, setIsDragging] = useState(false);
+  // const [startCoords, setStartCoords] = useState(null);
+  const [planActive, setPlanActive] = useState(false);
 
   const createIcon = (zoom, iconUrl) => {
     return new L.Icon({
       iconUrl: iconUrl,
       iconSize: [10 + zoom, 10 + zoom],
-      iconAnchor: [5 + zoom / 1,2 + zoom],
+      iconAnchor: [5 + zoom / 1, 2 + zoom],
     });
   };
 
@@ -100,92 +107,245 @@ const MapComponent = () => {
     setActiveLayer(event.target.value);
   };
 
-  return (
-    <div style={{display:"flex"}}>
-      <MapContainer 
-  center={position} 
-  zoom={zoomLevel} 
-  fullscreenControl={true}  
-  style={{ height: '650px', width: '800px', marginRight:"20px" }}
-  
->
-  <TileLayer url={activeLayer} />
-  <MarkerClusterGroup showCoverageOnHover={false} zoomToBoundsOnClick={true} maxClusterRadius={40}>
-    {markers.map((marker, index) => (
-      <Marker
-        key={index}
-        position={[marker.lat, marker.lng]}
-        icon={createIcon(zoomLevel, marker.icon.url)}
-        eventHandlers={{
-          contextmenu: () => handleRemoveMarker(index),
-        }}
-      >
-        <Popup>
-              <div style={{display:"flex", alignItems: "center"}}>
-                <img src={marker.icon.url} alt={marker.icon.name} style={{width:"40px", height:"40px", marginRight:"20px"}}>
-                </img>
-                <div>
-                <p> Some {marker.icon.name}</p>
-                <p>Short description </p>
-                </div>
-              </div>
-              </Popup>
-      </Marker>
-    ))}
-  </MarkerClusterGroup>
-  {polygons.map((polygon, index) => (
-    <Polygon key={index} positions={polygon} color="blue" fillOpacity={0} dashArray="5, 5" />
-  ))}
-  
-  {currentPolygon.length > 0 && (
-    <Polygon positions={currentPolygon} color="red" fillOpacity={0.3} dashArray="5, 5" />
-  )}
+  // // Обработчик начала перетаскивания
+  // const handleMouseDown = (e) => {
+  //   setIsDragging(true);
+  //   setStartCoords(e.latlng);
+  // };
 
-  <MapEvents />
-  <TrackMouseMovement />
-  <AddMarkerOnClick />
-  <AddPolygonOnClick />
-</MapContainer>
-      <div>
-      <ul style={{ listStyleType: 'none', padding: 0, width:"200px" }}>
-        {filteredIcons.map((icon, index) => (
-          <li
-            key={index}
-            onClick={() => handleIconSelect(icon)}
-            style={{
-              display:"flex",
-              alignItems: "center",
-              cursor: 'pointer',
-              padding: '5px',
-              border: '1px solid #ccc',
-              marginTop: '5px',
-              borderColor: selectedIcon.name === icon.name ? 'green' : '#ccc',
-              backgroundColor: selectedIcon.name === icon.name ? '#f0fff0' : 'transparent',
-            }}
-          >
-            <img src={icon.url} alt={icon.name} style={{ width: '20px', marginRight: '5px' }} />
-            {icon.name}
-          </li>
-        ))}
-      </ul>
-      
-      <div style={{ display:"flex", flexDirection:"row",alignItems: "center" }} >
-        <p style={{ height:"20px", marginRight:"10px"}} >Select layer:</p>
-      <select style={{  marginRight:"20px"}} onChange={handleLayerChange} value={activeLayer}>
-        {baseLayers.map((layer) => (
-          <option key={layer.name} value={layer.url}>
-            {layer.name}
-          </option>
-        ))}
-      </select>
-      {cursorCoords && (
-        <div >
-          lonlat [{cursorCoords.lat.toFixed(5)}, {cursorCoords.lng.toFixed(5)}]
+  // // Обработчик окончания перетаскивания
+  // const handleMouseUp = (e) => {
+  //   setIsDragging(false);
+  // };
+
+  // // Обработчик перетаскивания
+  // const handleMouseMove = (e) => {
+  //   if (isDragging) {
+  //     const newLat = overlayPosition[0] + (e.latlng.lat - startCoords.lat);
+  //     const newLng = overlayPosition[1] + (e.latlng.lng - startCoords.lng);
+  //     setOverlayPosition([newLat, newLng]);
+  //     setStartCoords(e.latlng); // Обновляем начальные координаты
+  //   }
+  // };
+
+  // Обработчик перемещения оверлея с помощью клавиш
+  const handleKeyDown = (e) => {
+    const step = 0.01; // Шаг перемещения
+    switch (e.key) {
+      case 'ArrowUp':
+        setOverlayPosition((prev) => [prev[0] + step, prev[1]]);
+        break;
+      case 'ArrowDown':
+        setOverlayPosition((prev) => [prev[0] - step, prev[1]]);
+        break;
+      case 'ArrowLeft':
+        setOverlayPosition((prev) => [prev[0], prev[1] - step]);
+        break;
+      case 'ArrowRight':
+        setOverlayPosition((prev) => [prev[0], prev[1] + step]);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const ImageOverlay = () => {
+    const map = useMap();
+    const overlayRef = useRef(null);
+
+    useEffect(() => {
+      const imageUrl = '/100XC0101_page-0001.jpg';
+      const imageBounds = [
+        [overlayPosition[0], overlayPosition[1]], // обновляем позицию оверлея
+        [overlayPosition[0] + imageSize.height, overlayPosition[1] + imageSize.width],
+      ];
+      console.log(imageBounds)
+
+      if (overlayRef.current) {
+        map.removeLayer(overlayRef.current);
+      }
+      overlayRef.current = L.imageOverlay(imageUrl, imageBounds, { opacity: imageOpacity }).addTo(map);
+      map.setMaxBounds(imageBounds);
+
+      return () => {
+        map.removeLayer(overlayRef.current);
+        map.setMaxBounds(null);
+      };
+    }, [map]);
+
+    return null;
+  };
+
+  // Обработчик изменения ширины
+  const handleWidthChange = (e) => {
+    const newWidth = parseFloat(e.target.value);
+    setImageSize((prev) => ({
+      ...prev,
+      width: newWidth,
+    }));
+  };
+
+  // Обработчик изменения высоты
+  const handleHeightChange = (e) => {
+    const newHeight = parseFloat(e.target.value);
+    setImageSize((prev) => ({
+      ...prev,
+      height: newHeight,
+    }));
+  };
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  // Функции для перемещения оверлея
+  const moveOverlay = (latOffset, lngOffset) => {
+    setOverlayPosition((prev) => [prev[0] + latOffset, prev[1] + lngOffset]);
+  };
+
+  return (
+    <div style={{ display: "flex" }}>
+      <MapContainer
+        center={position}
+        zoom={zoomLevel}
+        fullscreenControl={true}
+        style={{ height: '650px', width: '800px', marginRight: "20px" }}
+      >
+        <TileLayer url={activeLayer} />
+        <MarkerClusterGroup showCoverageOnHover={false} zoomToBoundsOnClick={true} maxClusterRadius={40}>
+          {markers.map((marker, index) => (
+            <Marker
+              key={index}
+              position={[marker.lat, marker.lng]}
+              icon={createIcon(zoomLevel, marker.icon.url)}
+              eventHandlers={{
+                contextmenu: () => handleRemoveMarker(index),
+              }}
+            >
+              <Popup>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <img src={marker.icon.url} alt={marker.icon.name} style={{ width: "40px", height: "40px", marginRight: "20px" }} />
+                  {marker.icon.name}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MarkerClusterGroup>
+        {polygons.map((polygon, index) => (
+            <Polygon key={index} positions={polygon} color="blue" fillOpacity={0} dashArray="5, 5"  />
+          ))}
+          
+          {currentPolygon.length > 0 && (
+            <Polygon positions={currentPolygon} color="red" fillOpacity={0.3} dashArray="5, 5" />
+          )}
+        {planActive && <ImageOverlay />}
+        <MapEvents />
+        <AddMarkerOnClick />
+        <AddPolygonOnClick />
+        <TrackMouseMovement />
+      </MapContainer>
+      <div style={{ marginLeft: "10px" }}>
+      <button onClick={() => setPlanActive(!planActive)} style={{ marginTop: '10px' }}>
+          {planActive ? 'Disable Plan' : 'Enable Plan'}
+        </button>
+      {planActive &&<div>
+        <div style={{ marginBottom: '10px' }}>
+          <label htmlFor="imageOpacity">Image Opacity: </label>
+          <input
+            id="imageOpacity"
+            type="range"
+            min="0"
+            max="1"
+            step="0.1"
+            value={imageOpacity}
+            onChange={(e) => setImageOpacity(parseFloat(e.target.value))}
+          />
+          <span>{imageOpacity}</span>
         </div>
-      )}
+        <div style={{ marginBottom: '10px' }}>
+          <label htmlFor="widthRange">Width: </label>
+          <input
+            id="widthRange"
+            type="range"
+            min="0.001"
+            max="0.1"
+            step="0.001"
+            value={imageSize.width}
+            onChange={handleWidthChange}
+            style={{ marginLeft: '10px' }}
+          />
+          <span style={{ marginLeft: '10px' }}>{imageSize.width}</span>
+        </div>
+        <div>
+          <label htmlFor="heightRange">Height: </label>
+          <input
+            id="heightRange"
+            type="range"
+            min="0.001"
+            max="0.1"
+            step="0.001"
+            value={imageSize.height}
+            onChange={handleHeightChange}
+            style={{ marginLeft: '10px' }}
+          />
+          <span style={{ marginLeft: '10px' }}>{imageSize.height}</span>
+        </div>
+
+        
+
+        {/* Кнопки для перемещения */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px' }}>
+          <button onClick={() => moveOverlay(0.0001, 0)}>Up</button>
+          <div style={{ display: 'flex' }}>
+            <button onClick={() => moveOverlay(0, -0.0001)}>Left</button>
+            <button onClick={() => moveOverlay(0, 0.0001)}>Right</button>
+          </div>
+          <button onClick={() => moveOverlay(-0.0001, 0)}>Down</button>
+        </div>
+        </div>}
+
+        <ul style={{ listStyleType: 'none', padding: 0, width: "200px" }}>
+          {filteredIcons.map((icon, index) => (
+            <li
+              key={index}
+              onClick={() => handleIconSelect(icon)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                cursor: 'pointer',
+                padding: '5px',
+                border: '1px solid #ccc',
+                marginTop: '5px',
+                borderColor: selectedIcon.name === icon.name ? 'green' : '#ccc',
+                backgroundColor: selectedIcon.name === icon.name ? '#f0fff0' : 'transparent',
+              }}
+            >
+              <img src={icon.url} alt={icon.name} style={{ width: '20px', marginRight: '5px' }} />
+              {icon.name}
+            </li>
+          ))}
+        </ul>
+
+        <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+          <p style={{ height: "20px", marginRight: "10px" }}>Select layer:</p>
+          <select style={{ marginRight: "20px" }} onChange={handleLayerChange} value={activeLayer}>
+            {baseLayers.map((layer) => (
+              <option key={layer.name} value={layer.url}>
+                {layer.name}
+              </option>
+            ))}
+          </select>
+          {cursorCoords && (
+            <div>
+              lonlat [{cursorCoords.lat.toFixed(5)}, {cursorCoords.lng.toFixed(5)}]
+            </div>
+          )}
+        </div>
+        
       </div>
-      </div>
-      
     </div>
   );
 };
