@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polygon, useMapEvents, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polygon, useMapEvents, useMap,CircleMarker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import MarkerClusterGroup from '@changey/react-leaflet-markercluster';
@@ -106,7 +106,7 @@ const MapComponent = () => {
   const handleLayerChange = (event) => {
     setActiveLayer(event.target.value);
   };
-
+  
   // // Обработчик начала перетаскивания
   // const handleMouseDown = (e) => {
   //   setIsDragging(true);
@@ -144,10 +144,17 @@ const MapComponent = () => {
       case 'ArrowRight':
         setOverlayPosition((prev) => [prev[0], prev[1] + step]);
         break;
+        case 'z':
+          if (e.ctrlKey) { // Проверяем, нажаты ли Ctrl и Z
+            e.preventDefault(); // Предотвращаем стандартное действие браузера
+            setCurrentPolygon((prev) => prev.slice(0, -1)); // Удаляем последнюю точку
+          }
+          break;
       default:
         break;
     }
   };
+  
 
   const ImageOverlay = () => {
     const map = useMap();
@@ -212,7 +219,7 @@ const MapComponent = () => {
         center={position}
         zoom={zoomLevel}
         fullscreenControl={true}
-        style={{ height: '650px', width: '800px', marginRight: "20px" }}
+        style={{ height: '650px', width: '800px', marginRight: "20px", cursor:"default"}}
       >
         <TileLayer url={activeLayer} />
         <MarkerClusterGroup showCoverageOnHover={false} zoomToBoundsOnClick={true} maxClusterRadius={40}>
@@ -239,8 +246,18 @@ const MapComponent = () => {
           ))}
           
           {currentPolygon.length > 0 && (
-            <Polygon positions={currentPolygon} color="red" fillOpacity={0.3} dashArray="5, 5" />
-          )}
+          <>
+            <Polygon positions={currentPolygon} color="red" fillOpacity={0} dashArray="5, 5" />
+            {currentPolygon.map((point, index) => (
+              <CircleMarker
+                key={index}
+                center={point}
+                radius={5}
+                pathOptions={{ color: 'red' }} // Set circle color to red
+              />
+            ))}
+          </>
+        )}
         {planActive && <ImageOverlay />}
         <MapEvents />
         <AddMarkerOnClick />
