@@ -30,7 +30,7 @@ const MapComponent = () => {
   const cursorCoordsRef = useRef(null);
   const [cursorCoords, setCursorCoords] = useState(null);
   const [activeLayer, setActiveLayer] = useState(baseLayers[0].url); // Initialize with the first layer
-  const [imageOpacity, setImageOpacity] = useState(1);
+  const [imageOpacity, setImageOpacity] = useState(0.5);
   const [imageSize, setImageSize] = useState({ width: 0.069, height: 0.045 });
 
   const [overlayPosition, setOverlayPosition] = useState([33.587859999999864, -86.16768999999995]);
@@ -329,8 +329,8 @@ const MapComponent = () => {
           ))}
         </ul>
 
-        <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-          <p style={{ height: "20px", marginRight: "10px" }}>Select layer:</p>
+          <div style={{display:"flex",alignItems:"center", height:"20px", margin:"10px"}}>
+          <p >Select layer:</p>
           <select style={{ marginRight: "20px" }} onChange={handleLayerChange} value={activeLayer}>
             {baseLayers.map((layer) => (
               <option key={layer.name} value={layer.url}>
@@ -338,12 +338,12 @@ const MapComponent = () => {
               </option>
             ))}
           </select>
+          </div>
           {cursorCoords && (
             <div>
               lonlat [{cursorCoords.lat.toFixed(5)}, {cursorCoords.lng.toFixed(5)}]
             </div>
           )}
-        </div>
         
       </div>
     </div>
