@@ -5,6 +5,7 @@ import L from 'leaflet';
 import MarkerClusterGroup from '@changey/react-leaflet-markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import {ImageOverlay} from './ImageOverlay';
 
 const icons = [
   { name: 'Antena', url: '/antena.png', type: 'antena' },
@@ -30,10 +31,7 @@ const MapComponent = () => {
   const cursorCoordsRef = useRef(null);
   const [cursorCoords, setCursorCoords] = useState(null);
   const [activeLayer, setActiveLayer] = useState(baseLayers[0].url); // Initialize with the first layer
-  const [imageOpacity, setImageOpacity] = useState(0.5);
-  const [imageSize, setImageSize] = useState({ width: 0.069, height: 0.045 });
 
-  const [overlayPosition, setOverlayPosition] = useState([33.587859999999864, -86.16768999999995]);
   // const [isDragging, setIsDragging] = useState(false);
   // const [startCoords, setStartCoords] = useState(null);
   const [planActive, setPlanActive] = useState(false);
@@ -102,116 +100,94 @@ const MapComponent = () => {
     setFilteredIcons(icons);
   };
 
-  // Handle layer change
   const handleLayerChange = (event) => {
     setActiveLayer(event.target.value);
   };
   
-  // // Обработчик начала перетаскивания
-  // const handleMouseDown = (e) => {
-  //   setIsDragging(true);
-  //   setStartCoords(e.latlng);
-  // };
-
-  // // Обработчик окончания перетаскивания
-  // const handleMouseUp = (e) => {
-  //   setIsDragging(false);
-  // };
-
-  // // Обработчик перетаскивания
-  // const handleMouseMove = (e) => {
-  //   if (isDragging) {
-  //     const newLat = overlayPosition[0] + (e.latlng.lat - startCoords.lat);
-  //     const newLng = overlayPosition[1] + (e.latlng.lng - startCoords.lng);
-  //     setOverlayPosition([newLat, newLng]);
-  //     setStartCoords(e.latlng); // Обновляем начальные координаты
+  // const handleKeyDown = (e) => {
+  //   const step = 0.01; // Шаг перемещения
+  //   switch (e.key) {
+  //     case 'ArrowUp':
+  //       setOverlayPosition((prev) => [prev[0] + step, prev[1]]);
+  //       break;
+  //     case 'ArrowDown':
+  //       setOverlayPosition((prev) => [prev[0] - step, prev[1]]);
+  //       break;
+  //     case 'ArrowLeft':
+  //       setOverlayPosition((prev) => [prev[0], prev[1] - step]);
+  //       break;
+  //     case 'ArrowRight':
+  //       setOverlayPosition((prev) => [prev[0], prev[1] + step]);
+  //       break;
+  //       case 'z':
+  //         if (e.ctrlKey) { // Проверяем, нажаты ли Ctrl и Z
+  //           e.preventDefault(); // Предотвращаем стандартное действие браузера
+  //           setCurrentPolygon((prev) => prev.slice(0, -1)); // Удаляем последнюю точку
+  //         }
+  //         break;
+  //     default:
+  //       break;
   //   }
   // };
-
-  // Обработчик перемещения оверлея с помощью клавиш
-  const handleKeyDown = (e) => {
-    const step = 0.01; // Шаг перемещения
-    switch (e.key) {
-      case 'ArrowUp':
-        setOverlayPosition((prev) => [prev[0] + step, prev[1]]);
-        break;
-      case 'ArrowDown':
-        setOverlayPosition((prev) => [prev[0] - step, prev[1]]);
-        break;
-      case 'ArrowLeft':
-        setOverlayPosition((prev) => [prev[0], prev[1] - step]);
-        break;
-      case 'ArrowRight':
-        setOverlayPosition((prev) => [prev[0], prev[1] + step]);
-        break;
-        case 'z':
-          if (e.ctrlKey) { // Проверяем, нажаты ли Ctrl и Z
-            e.preventDefault(); // Предотвращаем стандартное действие браузера
-            setCurrentPolygon((prev) => prev.slice(0, -1)); // Удаляем последнюю точку
-          }
-          break;
-      default:
-        break;
-    }
-  };
   
 
-  const ImageOverlay = () => {
-    const map = useMap();
-    const overlayRef = useRef(null);
+  // const ImageOverlay = () => {
+  //   const map = useMap();
+  //   const overlayRef = useRef(null);
 
-    useEffect(() => {
-      const imageUrl = '/100XC0101_page-0001.jpg';
-      const imageBounds = [
-        [overlayPosition[0], overlayPosition[1]], // обновляем позицию оверлея
-        [overlayPosition[0] + imageSize.height, overlayPosition[1] + imageSize.width],
-      ];
-      console.log(imageBounds)
+  //   useEffect(() => {
+  //     const imageUrl = '/100XC0101_page-0001.jpg';
+  //     const imageBounds = [
+  //       [overlayPosition[0], overlayPosition[1]], // обновляем позицию оверлея
+  //       [overlayPosition[0] + imageSize.height, overlayPosition[1] + imageSize.width],
+  //     ];
+  //     console.log(imageBounds)
 
-      if (overlayRef.current) {
-        map.removeLayer(overlayRef.current);
-      }
-      overlayRef.current = L.imageOverlay(imageUrl, imageBounds, { opacity: imageOpacity }).addTo(map);
-      map.setMaxBounds(imageBounds);
+  //     if (overlayRef.current) {
+  //       map.removeLayer(overlayRef.current);
+  //     }
+  //     overlayRef.current = L.imageOverlay(imageUrl, imageBounds, { opacity: imageOpacity }).addTo(map);
+  //     map.setMaxBounds(imageBounds);
 
-      return () => {
-        map.removeLayer(overlayRef.current);
-        map.setMaxBounds(null);
-      };
-    }, [map]);
+  //     return () => {
+  //       map.removeLayer(overlayRef.current);
+  //       map.setMaxBounds(null);
+  //     };
+  //   }, [map]);
 
-    return null;
-  };
+  //   return null;
+  // };
 
   // Обработчик изменения ширины
-  const handleWidthChange = (e) => {
-    const newWidth = parseFloat(e.target.value);
-    setImageSize((prev) => ({
-      ...prev,
-      width: newWidth,
-    }));
-  };
+  // const handleWidthChange = (e) => {
+  //   const newWidth = parseFloat(e.target.value);
+  //   setImageSize((prev) => ({
+  //     ...prev,
+  //     width: newWidth,
+  //   }));
+  // };
 
   // Обработчик изменения высоты
-  const handleHeightChange = (e) => {
-    const newHeight = parseFloat(e.target.value);
-    setImageSize((prev) => ({
-      ...prev,
-      height: newHeight,
-    }));
-  };
+  // const handleHeightChange = (e) => {
+  //   const newHeight = parseFloat(e.target.value);
+  //   setImageSize((prev) => ({
+  //     ...prev,
+  //     height: newHeight,
+  //   }));
+  // };
 
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
+  // useEffect(() => {
+  //   window.addEventListener('keydown', handleKeyDown);
+  //   return () => {
+  //     window.removeEventListener('keydown', handleKeyDown);
+  //   };
+  // }, []);
 
   // Функции для перемещения оверлея
-  const moveOverlay = (latOffset, lngOffset) => {
-    setOverlayPosition((prev) => [prev[0] + latOffset, prev[1] + lngOffset]);
-  };
+  // const moveOverlay = (latOffset, lngOffset) => {
+  //   setOverlayPosition((prev) => [prev[0] + latOffset, prev[1] + lngOffset]);
+  // };
+  
 
   return (
     <div style={{ display: "flex" }}>
@@ -271,7 +247,7 @@ const MapComponent = () => {
       {planActive &&<div>
         <div style={{ marginBottom: '10px' }}>
           <label htmlFor="imageOpacity">Image Opacity: </label>
-          <input
+          {/* <input
             id="imageOpacity"
             type="range"
             min="0"
@@ -279,12 +255,12 @@ const MapComponent = () => {
             step="0.1"
             value={imageOpacity}
             onChange={(e) => setImageOpacity(parseFloat(e.target.value))}
-          />
-          <span>{imageOpacity}</span>
+          /> */}
+          {/* <span>{imageOpacity}</span> */}
         </div>
         <div style={{ marginBottom: '10px' }}>
           <label htmlFor="widthRange">Width: </label>
-          <input
+          {/* <input
             id="widthRange"
             type="range"
             min="0.001"
@@ -294,11 +270,11 @@ const MapComponent = () => {
             onChange={handleWidthChange}
             style={{ marginLeft: '10px' }}
           />
-          <span style={{ marginLeft: '10px' }}>{imageSize.width}</span>
+          <span style={{ marginLeft: '10px' }}>{imageSize.width}</span> */}
         </div>
         <div>
           <label htmlFor="heightRange">Height: </label>
-          <input
+          {/* <input
             id="heightRange"
             type="range"
             min="0.001"
@@ -308,20 +284,20 @@ const MapComponent = () => {
             onChange={handleHeightChange}
             style={{ marginLeft: '10px' }}
           />
-          <span style={{ marginLeft: '10px' }}>{imageSize.height}</span>
+          <span style={{ marginLeft: '10px' }}>{imageSize.height}</span> */}
         </div>
 
         
 
         {/* Кнопки для перемещения */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px' }}>
+        {/* <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px' }}>
           <button onClick={() => moveOverlay(0.0001, 0)}>Up</button>
           <div style={{ display: 'flex' }}>
             <button onClick={() => moveOverlay(0, -0.0001)}>Left</button>
             <button onClick={() => moveOverlay(0, 0.0001)}>Right</button>
           </div>
           <button onClick={() => moveOverlay(-0.0001, 0)}>Down</button>
-        </div>
+        </div> */}
         </div>}
 
         <ul style={{ listStyleType: 'none', padding: 0, width: "200px" }}>
