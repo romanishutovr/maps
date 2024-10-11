@@ -37,6 +37,7 @@ const MapComponent = () => {
   // const [isDragging, setIsDragging] = useState(false);
   // const [startCoords, setStartCoords] = useState(null);
   const [planActive, setPlanActive] = useState(false);
+  const mapRef = useRef(null);
 
   const createIcon = (zoom, iconUrl) => {
     return new L.Icon({
@@ -159,29 +160,66 @@ const MapComponent = () => {
   const ImageOverlay = () => {
     const map = useMap();
     const overlayRef = useRef(null);
+    const draggingRef = useRef(false);
+    const startCoordsRef = useRef(null);
 
     useEffect(() => {
-      const imageUrl = '/100XC0101_page-0001.jpg';
-      const imageBounds = [
-        [overlayPosition[0], overlayPosition[1]], // обновляем позицию оверлея
-        [overlayPosition[0] + imageSize.height, overlayPosition[1] + imageSize.width],
-      ];
-      console.log(imageBounds)
+        const imageUrl = '/100XC0101_page-0001.jpg';
+        const imageBounds = [
+            [overlayPosition[0], overlayPosition[1]], // Updated position
+            [overlayPosition[0] + imageSize.height, overlayPosition[1] + imageSize.width],
+        ];
 
-      if (overlayRef.current) {
-        map.removeLayer(overlayRef.current);
-      }
-      overlayRef.current = L.imageOverlay(imageUrl, imageBounds, { opacity: imageOpacity }).addTo(map);
-      map.setMaxBounds(imageBounds);
+        if (overlayRef.current) {
+            map.removeLayer(overlayRef.current);
+        }
 
-      return () => {
-        map.removeLayer(overlayRef.current);
-        map.setMaxBounds(null);
-      };
-    }, [map]);
+        overlayRef.current = L.imageOverlay(imageUrl, imageBounds, {
+            opacity: imageOpacity,
+            interactive: true,
+        }).addTo(map);
+
+        // Mouse down to initiate dragging
+        overlayRef.current.getElement().addEventListener('mousedown', (e) => {
+            draggingRef.current = true;
+            map.dragging.disable(); // Disable map dragging while dragging the overlay
+            startCoordsRef.current = map.mouseEventToLatLng(e);
+        });
+
+        // Mouse move to handle dragging
+        map.on('mousemove', (e) => {
+            if (!draggingRef.current) return;
+
+            const currentCoords = e.latlng;
+            const latOffset = currentCoords.lat - startCoordsRef.current.lat;
+            const lngOffset = currentCoords.lng - startCoordsRef.current.lng;
+
+            setOverlayPosition((prev) => [prev[0] + latOffset, prev[1] + lngOffset]);
+            startCoordsRef.current = currentCoords;
+        });
+
+        // Mouse up to stop dragging
+        map.on('mouseup', () => {
+            if (draggingRef.current) {
+                draggingRef.current = false;
+                map.dragging.enable(); // Re-enable map dragging after overlay drag
+            }
+        });
+
+        overlayRef.current.bringToFront();
+
+        return () => {
+            if (overlayRef.current) {
+                map.removeLayer(overlayRef.current);
+            }
+        };
+    }, [map, overlayPosition, imageOpacity, imageSize]);
 
     return null;
-  };
+};
+
+
+
 
   // Обработчик изменения ширины
   const handleWidthChange = (e) => {
@@ -213,6 +251,8 @@ const MapComponent = () => {
     setOverlayPosition((prev) => [prev[0] + latOffset, prev[1] + lngOffset]);
   };
 
+  useEffect(() => {console.log(overlayPosition)}, [overlayPosition]);
+
   return (
     <div style={{ display: "flex" }}>
       <MapContainer
@@ -220,6 +260,9 @@ const MapComponent = () => {
         zoom={zoomLevel}
         fullscreenControl={true}
         style={{ height: '650px', width: '800px', marginRight: "20px", cursor:"default"}}
+        whenReady={(map) => {
+          mapRef.current = map;
+        }}
       >
         <TileLayer url={activeLayer} />
         <MarkerClusterGroup showCoverageOnHover={false} zoomToBoundsOnClick={true} maxClusterRadius={40}>
@@ -265,7 +308,10 @@ const MapComponent = () => {
         <TrackMouseMovement />
       </MapContainer>
       <div style={{ marginLeft: "10px" }}>
-      <button onClick={() => setPlanActive(!planActive)} style={{ marginTop: '10px' }}>
+      <button onClick={() => {
+        setPlanActive(!planActive)
+
+      }} style={{ marginTop: '10px' }}>
           {planActive ? 'Disable Plan' : 'Enable Plan'}
         </button>
       {planActive &&<div>
