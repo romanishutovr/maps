@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Polygon, CircleMarker,Popup } from 'react-leaflet';
 import L from 'leaflet';
 import MarkerClusterGroup from '@changey/react-leaflet-markercluster';

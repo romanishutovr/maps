@@ -3,6 +3,7 @@ import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 
 const ImageOverlayComponent = () => {
+  // eslint-disable-next-line no-unused-vars
   const [overlayPosition, setOverlayPosition] = useState([
     {lat: 33.6327735188563, lng: -86.09795928261377},
     {lat: 33.588244890412476, lng: -86.16818079875364},
@@ -151,6 +152,7 @@ const ImageOverlayComponent = () => {
         map.removeLayer(overlayRef.current);
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, overlayPosition]); // Removed opacity from dependencies
 
   // Separate effect for handling opacity changes
