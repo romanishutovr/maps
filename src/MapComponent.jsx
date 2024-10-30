@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Polygon, CircleMarker,Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polygon, CircleMarker,Popup,useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import MarkerClusterGroup from '@changey/react-leaflet-markercluster';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
+
 import IconSelector from './IconSelector';
 import LayerSelector from './LayerSelector';
 import ImageOverlayComponent from './ImageOverlayComponent';
 import MapEvents from './MapEvents';
+import {TrackMouseMovement} from './TrackMouseMovement';
 
 const icons = [
   { name: 'Antena', url: '/antena.png', type: 'antena' },
@@ -50,6 +52,17 @@ const MapComponent = () => {
     const handleRemoveMarker = (index) => {
       setMarkers((current) => current.filter((_, i) => i !== index));
     };
+    
+  //   const TrackMouseMovement = () => {
+  //     useMapEvents({
+  // mousemove: (e) => {
+  //   setCurrentPosition(e.latlng.lat + ", " + e.latlng.lng);
+  //   console.log(e)
+  // },
+        
+  //     });
+  //     return null;
+  //   };
 
 
   return (
@@ -98,7 +111,9 @@ const MapComponent = () => {
           setCurrentPolygon={setCurrentPolygon}
           currentPolygon={currentPolygon}
           setPolygons={setPolygons}
+          // setCurrentPosition={setCurrentPosition}
         />
+        <TrackMouseMovement />
       </MapContainer>
 
       <div style={{ marginLeft: "10px" }}>

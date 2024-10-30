@@ -8,7 +8,7 @@ const ImageOverlayComponent = () => {
     {lat: 33.6327735188563, lng: -86.09795928261377},
     {lat: 33.588244890412476, lng: -86.16818079875364},
   ]);
-  const [opacity, setOpacity] = useState(1); // State for overlay opacity
+  const [opacity, setOpacity] = useState(0.5); // State for overlay opacity
 
   const map = useMap();
   const overlayRef = useRef(null);
