@@ -6,7 +6,6 @@ export const TrackMouseMovement = () => {
 useMapEvents({
 mousemove: (e) => {
 setCurrentPosition(e.latlng.lat.toString().slice(0,10) + ", " + e.latlng.lng.toString().slice(0,10));
-console.log(e)
 },
     
   });
